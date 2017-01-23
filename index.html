@@ -115,7 +115,7 @@
         var geoLoc;
         var longitude;
         var latitude;
-
+        var circle;
        
 
 
@@ -124,6 +124,19 @@
                 center: { lat: -33.8688, lng: 151.2195 },
                 zoom: 13
             });
+            circle = new google.maps.Circle({
+                map: map,
+                clickable: false,
+                // metres
+                radius: 50,
+                fillColor: '#fff',
+                fillOpacity: .6,
+                strokeColor: '#313131',
+                strokeOpacity: .4,
+                strokeWeight: .8
+            });
+            // attach circle to marker
+            
             var card = document.getElementById('pac-card');
             var input = document.getElementById('pac-input');
             map.controls[google.maps.ControlPosition.TOP_RIGHT].push(card);
@@ -163,7 +176,7 @@
                 }
                 marker.setPosition(place.geometry.location);
                 marker.setVisible(true);
-
+                circle.bindTo('center', marker, 'position');
                 var address = '';
                 if (place.address_components) {
                     address = [
@@ -180,19 +193,23 @@
                 infowindowContent.children['place-name'].textContent = place.name;
                 infowindowContent.children['place-address'].textContent = address;
                 infowindow.open(map, marker);
-                setInterval( getLocationUpdate(),3000);
+                getLocationUpdate();
             });
-          
+           
         }
         function showLocation(position) {
+          
             var latitude1 = position.coords.latitude;
             var longitude1 = position.coords.longitude;
-            //if (longitude == longitude1 && latitude == latitude1)
-            alert("Latitude : " + latitude1 + " Longitude: " + longitude1);
-            alert("Latitude : " + latitude + " Longitude: " + longitude);
+            var  latLngCenter = new google.maps.LatLng(latitude1, longitude1),
+                // get the Bounds of the circle
+                
+                 bounds = circle.getBounds();
+            alert(bounds.contains(latLngCenter));
         }
 
         function errorHandler(err) {
+           
             if (err.code == 1) {
                 alert("Error: Access is denied!");
             }
@@ -205,7 +222,7 @@
         function getLocationUpdate() {
             if (navigator.geolocation) {
                 // timeout at 60000 milliseconds (60 seconds)
-                var options = { timeout: 600};
+                var options = { timeout: 10000, enableHighAccuracy: false };
                 geoLoc = navigator.geolocation;
                 watchID = geoLoc.watchPosition(showLocation, errorHandler, options);
             }
